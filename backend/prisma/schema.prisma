@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  OWNER
+  PG_OWNER
+  RESTAURANT_OWNER
+  ADMIN
+}
+
+enum PropertyType {
+  PG
+  RESTAURANT
+}
+
+enum Gender {
+  BOYS
+  GIRLS
+  COED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      Role     @default(USER)
+  joinedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  properties Property[]
+  inquiries  Inquiry[]
+}
+
+model Property {
+  id          String       @id @default(uuid())
+  type        PropertyType
+  title       String
+  description String       @db.Text
+  city        String
+  college     String?
+  cuisine     String?      // for restaurant
+  gender      Gender?      // for PG
+  price       Float
+  rating      Float        @default(0)
+  reviews     Int          @default(0)
+  views       Int          @default(0)
+  images      String[]
+  amenities   String[]
+  
+  // Storing sharing options as JSON. 
+  // Example: [{ type: "Single", price: 12000 }]
+  sharingOptions Json?
+
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  inquiries   Inquiry[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Inquiry {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name        String
+  email       String?
+  phone       String?
+  message     String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+}
