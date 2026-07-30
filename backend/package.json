@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.13.0",
